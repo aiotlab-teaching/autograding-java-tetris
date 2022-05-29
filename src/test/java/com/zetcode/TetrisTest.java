@@ -1,61 +1,37 @@
 package com.zetcode;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class TetrisTest {
+import org.junit.*;
+import static org.junit.Assert.*;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+import java.awt.event.WindowEvent;
+public class TetrisTest {
     static private Tetris tetris;
-    static private Board tetris_board;
-
-    private boolean tetris_move(int x_val) {
-        return tetris_board.tryMove(tetris_board.getCurPiece(),
-                tetris_board.curX + x_val, tetris_board.curY);
-    }
-
-    private boolean tetris_rotate(boolean clockwise) {
-        Shape piece;
-        if (clockwise)
-            piece = tetris_board.getCurPiece().rotateLeft();
-        else
-            piece = tetris_board.getCurPiece().rotateRight();
-        return tetris_board.tryMove(piece, tetris_board.curX, tetris_board.curY);
-    }
-
-    @BeforeAll
+    @BeforeClass
     public static void beforeTest() {
-        //System.setProperty("java.awt.headless", "false");
-        tetris_board = new Board();
-
-        boolean isHeadless = java.awt.
-                GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadless();
-
-        if (isHeadless == false) {
-            tetris = new Tetris(tetris_board);
-            tetris.setVisible(true);
-        }
+        tetris = new Tetris();
+        tetris.setVisible(true);
     }
 
     @Test
     public void testRandomMove() {
-        tetris_board.start();
-        // Random move
+        tetris.restart();
+// Random move
         int t = 0;
         try {
             while (t < 100) {
                 if (Math.random() > 0.5)
-                    tetris_move(1);
+                    tetris.move(1);
                 else
-                    tetris_move(-1);
+                    tetris.move(-1);
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                 }
                 if (Math.random() > 0.5)
-                    tetris_rotate(false);
+                    tetris.rotate(false);
                 else
-                    tetris_rotate(true);
+                    tetris.rotate(true);
                 t++;
             }
         } catch (Exception e) {
@@ -65,61 +41,68 @@ class TetrisTest {
 
     @Test
     public void testGameOver() {
-        tetris_board.start();
         for (int i=0; i<10; i++)
-            tetris_board.dropDown();
-        boolean ret = tetris_board.getGameOver();
+            tetris.dropDown();
+        boolean ret = tetris.isGameOver();
         assertTrue(ret);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
     }
-
     @Test
     public void testSquareShapes() {
-        tetris_board.start();
+        tetris.restart();
         for (int x=-6; x<=4; x += 2) {
-            tetris_board.newPiece(Shape.Tetrominoe.SquareShape);
-            tetris_move(x);
-
+            tetris.newPiece(Shape.Tetrominoe.SquareShape);
+            tetris.move(x);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-            tetris_board.dropDown();
+            tetris.dropDown();
         }
-        int lines = tetris_board.getLinesRemoved();
+        int lines = tetris.getLinesRemoved();
         assertTrue(lines == 2);
     }
-
     @Test
     public void testLineShapes() {
-        tetris_board.start();
-        tetris_board.newPiece(Shape.Tetrominoe.LineShape);
-        tetris_move(-6);
-        tetris_board.dropDown();
+        tetris.restart();
+        tetris.newPiece(Shape.Tetrominoe.LineShape);
+        tetris.move(-6);
+        tetris.dropDown();
 
-        tetris_board.newPiece(Shape.Tetrominoe.LineShape);
-        tetris_move(-5);
-        tetris_board.dropDown();
+        tetris.newPiece(Shape.Tetrominoe.LineShape);
+        tetris.move(-5);
+        tetris.dropDown();
 
-        tetris_board.newPiece(Shape.Tetrominoe.LineShape);
-        tetris_rotate(true);
-        tetris_move(-3);
-        tetris_board.dropDown();
+        tetris.newPiece(Shape.Tetrominoe.LineShape);
+        tetris.rotate(true);
+        tetris.move(-3);
+        tetris.dropDown();
 
-        tetris_board.newPiece(Shape.Tetrominoe.LineShape);
-        tetris_rotate(true);
-        tetris_move(1);
-        tetris_board.dropDown();
+        tetris.newPiece(Shape.Tetrominoe.LineShape);
+        tetris.rotate(true);
+        tetris.move(1);
+        tetris.dropDown();
 
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
         }
 
-        int lines = tetris_board.getLinesRemoved();
+        int lines = tetris.getLinesRemoved();
         assertTrue(lines == 1);
     }
+    public static void main(String[] args) {
+        Result result = JUnitCore.runClasses(TetrisTest.class);
+        for (Failure failure : result.getFailures()) {
+            System.out.println(failure.toString());
+        }
+        System.out.println(result.wasSuccessful());
+// Closing the window after the final result is printed
+        tetris.dispatchEvent(new WindowEvent(tetris, WindowEvent.WINDOW_CLOSING));
+    }
+
+
 }
